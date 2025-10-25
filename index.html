@@ -231,6 +231,93 @@
             font-weight: 300;
         }
 
+        .map-search-container {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .map-search-box {
+            flex: 1;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        .map-search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: 400;
+        }
+
+        .map-search-box input:focus {
+            outline: none;
+            border-color: #1c1917;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .map-search-box input::placeholder {
+            color: #a8a29e;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: #ffffff;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f5f4;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: #fafaf9;
+        }
+
+        .search-result-name {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #1c1917;
+            margin-bottom: 0.25rem;
+        }
+
+        .search-result-address {
+            font-size: 0.75rem;
+            color: #78716c;
+            font-weight: 300;
+        }
+
         .pin-categories {
             display: flex;
             gap: 0.5rem;
@@ -680,19 +767,6 @@
         .leaflet-control-zoom a:hover {
             background: #f5f5f4 !important;
         }
-
-        .detail-content {
-            color: #78716c;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .detail-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 0.5rem;
-        }
     </style>
 </head>
 
@@ -711,20 +785,16 @@
             </div>
 
             <div class="sidebar-header search-view" id="searchView" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <h2 class="editable-heading" style="margin-bottom: 0;">find a place</h2>
-                </div>
-                <div class="place-search-box" style="margin-top: 1.5rem;">
+                <h2 class="editable-heading">find a place</h2>
+                <div class="place-search-box">
                     <input type="text" id="placeSearchInput" placeholder="search for any place or address...">
                     <div class="place-search-results" id="placeSearchResults"></div>
                 </div>
             </div>
 
             <div class="sidebar-header" id="spotsView">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <h2 class="editable-heading" contenteditable="true" style="margin-bottom: 0;">my spots</h2>
-                </div>
-                <div class="search-box" style="margin-top: 1.5rem;">
+                <h2 class="editable-heading" contenteditable="true">my spots</h2>
+                <div class="search-box">
                     <input type="text" id="searchInput" placeholder="search locations...">
                 </div>
                 <div class="pin-categories">
@@ -826,15 +896,15 @@
 
             <div class="form-group" id="viewLocationNotesGroup" style="display: none;">
                 <label>notes</label>
-                <div id="viewLocationNotes" class="detail-content"></div>
+                <div id="viewLocationNotes" style="color: #78716c; font-size: 0.875rem; line-height: 1.5;"></div>
             </div>
 
             <div class="form-group" id="viewLocationImageGroup" style="display: none;">
-                <img id="viewLocationImage" class="detail-image">
+                <img id="viewLocationImage" style="width: 100%; border-radius: 8px; margin-top: 0.5rem;">
             </div>
 
             <div class="modal-actions">
-                <button class="btn-danger" id="deleteLocationBtn">delete pin</button>
+                <button class="btn-danger" id="deleteLocationBtn">delete</button>
                 <button class="btn-primary" id="closeViewBtn">close</button>
             </div>
         </div>
@@ -874,37 +944,6 @@
             'visited': { color: '#1c1917' },
             'plan-to-visit': { color: '#78716c' }
         };
-
-        // Storage functions
-        async function saveToStorage() {
-            try {
-                const data = markers.map(({ data }) => data);
-                const result = await window.storage.set('map-locations', JSON.stringify(data));
-                console.log('Saved to storage:', result);
-            } catch (error) {
-                console.error('Storage save error:', error);
-                // Fallback to localStorage
-                const data = markers.map(({ data }) => data);
-                localStorage.setItem('footprintLocations', JSON.stringify(data));
-            }
-        }
-
-        async function loadFromStorage() {
-            try {
-                const result = await window.storage.get('map-locations');
-                if (result && result.value) {
-                    return JSON.parse(result.value);
-                }
-            } catch (error) {
-                console.log('Storage load error, using localStorage:', error);
-                // Fallback to localStorage
-                const saved = localStorage.getItem('footprintLocations');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-            }
-            return [];
-        }
 
         // Switch between search and spots view
         function switchView(view) {
@@ -1104,23 +1143,18 @@
         function deleteCurrentLocation() {
             if (!currentLocationData) return;
 
-            if (!confirm(`Delete "${currentLocationData.name}"? This cannot be undone.`)) return;
+            if (!confirm(`delete "${currentLocationData.name}"?`)) return;
 
             // Find and remove marker
             const index = markers.findIndex(m => m.data === currentLocationData);
             if (index !== -1) {
                 map.removeLayer(markers[index].marker);
                 markers.splice(index, 1);
-                saveToStorage();
+                savePins();
                 renderLocations();
             }
 
             closeViewModal();
-        }
-
-        function deleteTab(folderId, event) {
-            event.stopPropagation();
-            deleteFolder(folderId, event);
         }
 
         function openNewFolderModal() {
@@ -1181,17 +1215,9 @@
                 return;
             }
 
-            if (!confirm(`delete folder "${folderId}"? All locations in this folder will be moved to "food".`)) {
+            if (!confirm(`delete folder "${folderId}"?`)) {
                 return;
             }
-
-            // Move all locations from this folder to 'food'
-            markers.forEach(({ data }) => {
-                if (data.folder === folderId) {
-                    data.folder = 'food';
-                }
-            });
-            saveToStorage();
 
             folders = folders.filter(f => f !== folderId);
 
@@ -1204,7 +1230,6 @@
             }
 
             renderTabs();
-            renderLocations();
         }
 
         function renderTabs() {
@@ -1212,7 +1237,7 @@
             const tabsHtml = folders.map(folder => {
                 const name = customFolders[folder]?.name || folder;
                 const isCustom = !['all', 'food', 'views', 'places'].includes(folder);
-                const deleteBtn = isCustom ? `<span class="delete-tab" onclick="deleteTab('${folder}', event)">×</span>` : '';
+                const deleteBtn = isCustom ? `<span class="delete-tab" onclick="deleteFolder('${folder}', event)">×</span>` : '';
 
                 return `<button class="tab ${folder === currentFolder ? 'active' : ''}" data-folder="${folder}">${name}${deleteBtn}</button>`;
             }).join('');
@@ -1221,12 +1246,7 @@
 
             // Re-attach event listeners
             document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    // Don't switch folder if clicking delete button
-                    if (!e.target.classList.contains('delete-tab')) {
-                        switchFolder(tab.dataset.folder);
-                    }
-                });
+                tab.addEventListener('click', () => switchFolder(tab.dataset.folder));
             });
             document.getElementById('addTabBtn').addEventListener('click', openNewFolderModal);
         }
@@ -1270,7 +1290,7 @@
             });
 
             markers.push({ marker, data: location });
-            saveToStorage();
+            savePins();
             renderLocations();
             closeModal();
         }
@@ -1313,17 +1333,23 @@
                 `;
             }).join('');
 
-            // Add click listeners to cards
+            // Add click listeners
             document.querySelectorAll('.location-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const index = parseInt(card.dataset.index);
-                    const { marker, data } = markers[index];
-                    // Zoom to location on map
-                    map.setView(marker.getLatLng(), 15);
-                    // Open details modal
-                    openLocationDetails(data);
+                    focusLocation(index);
                 });
             });
+        }
+
+        function focusLocation(index) {
+            const { marker } = markers[index];
+            map.setView(marker.getLatLng(), 15);
+        }
+
+        function savePins() {
+            const data = markers.map(({ data }) => data);
+            localStorage.setItem('footprintLocations', JSON.stringify(data));
         }
 
         function loadFolders() {
@@ -1332,9 +1358,10 @@
             renderTabs();
         }
 
-        async function loadPins() {
-            const locations = await loadFromStorage();
-            if (locations && locations.length > 0) {
+        function loadPins() {
+            const saved = localStorage.getItem('footprintLocations');
+            if (saved) {
+                const locations = JSON.parse(saved);
                 locations.forEach(data => {
                     const marker = L.marker([data.lat, data.lng], {
                         icon: createIcon(pinCategories[data.category].color)
@@ -1356,7 +1383,6 @@
             if (!confirm('clear all locations? this cannot be undone.')) return;
             markers.forEach(({ marker }) => map.removeLayer(marker));
             markers = [];
-            saveToStorage();
             localStorage.removeItem('footprintLocations');
             renderLocations();
         }
