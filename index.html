@@ -1,52 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World with OpenStreetMap</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    // ...existing code...
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        #map {
-            width: 800px;
-            height: 450px;
-            margin-top: 20px;
-            border: 2px solid #333;
+        // ...existing code...
+        .controls {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
     <h1>Hello, World!</h1>
+    <div class="controls">
+        <button onclick="clearPins()">Clear All Pins</button>
+    </div>
     <div id="map"></div>
+
     <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js"></script>
+    // ...existing code...
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Initialize the map
-        const map = L.map('map').setView([43.6532, -79.3832], 13); // Centered on Toronto
+        const map = L.map('map').setView([43.6532, -79.3832], 13);
 
         // Add the OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+
+        // Array to store markers
+        let markers = [];
+
+        // Load pins from localStorage
+        function loadPins() {
+            const savedPins = localStorage.getItem('mapPins');
+            if (savedPins) {
+                const pins = JSON.parse(savedPins);
+                pins.forEach(pin => {
+                    const marker = L.marker([pin.lat, pin.lng]).addTo(map);
+                    markers.push(marker);
+                });
+            }
+        }
+
+        // Save pins to localStorage
+        function savePins() {
+            const pins = markers.map(marker => {
+                const position = marker.getLatLng();
+                return {
+                    lat: position.lat,
+                    lng: position.lng
+                };
+            });
+            localStorage.setItem('mapPins', JSON.stringify(pins));
+        }
+
+        // Clear all pins
+        function clearPins() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            localStorage.removeItem('mapPins');
+        }
+
+        // Add click handler to map
+        map.on('click', function(e) {
+            const marker = L.marker(e.latlng).addTo(map);
+            markers.push(marker);
+            savePins();
+        });
+
+        // Load saved pins when the page loads
+        loadPins();
     </script>
 </body>
 </html>
