@@ -1,454 +1,462 @@
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Caveat:wght@400;500;600&display=swap');
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        background: #fef9f3;
-        color: #4a3f35;
-        overflow: hidden;
-    }
-
-    header {
-        background: #fff9f0;
-        border-bottom: 2px solid #f5e6d3;
-        padding: 1.25rem 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(139, 109, 83, 0.08);
-    }
-
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .logo {
-        font-family: 'Caveat', cursive;
-        font-size: 2rem;
-        font-weight: 600;
-        color: #8b6d53;
-        text-shadow: 2px 2px 0px rgba(245, 230, 211, 0.5);
-        letter-spacing: 0.02em;
-    }
-
-    .header-title {
-        font-size: 0.875rem;
-        font-weight: 400;
-        color: #8b6d53;
-        cursor: pointer;
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        transition: background 0.2s;
-        background: rgba(245, 230, 211, 0.3);
-        border: 1px dashed #d4b896;
-    }
-
-    .header-title:hover {
-        background: rgba(245, 230, 211, 0.6);
-    }
-
-    .header-title[contenteditable="true"] {
-        outline: none;
-        background: rgba(245, 230, 211, 0.6);
-    }
-
-    .container {
-        display: flex;
-        flex: 1;
-        overflow: hidden;
-    }
-
-    #map {
-        flex: 1;
-        border-right: 2px solid #f5e6d3;
-        z-index: 1;
-    }
-
-    .sidebar {
-        width: 400px;
-        background: #fff9f0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: -4px 0 12px rgba(139, 109, 83, 0.1);
-    }
-
-    .view-toggle {
-        display: flex;
-        gap: 0.5rem;
-        padding: 1.25rem 1.5rem 0;
-        border-bottom: 2px solid #f5e6d3;
-    }
-
-    .view-tab {
-        flex: 1;
-        padding: 0.75rem;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 400;
-        color: #8b6d53;
-        border-radius: 12px 12px 0 0;
-        transition: all 0.2s;
-        text-align: center;
-        border: 1px solid transparent;
-    }
-
-    .view-tab:hover {
-        background: rgba(245, 230, 211, 0.4);
-        color: #4a3f35;
-    }
-
-    .view-tab.active {
-        background: #ffffff;
-        color: #4a3f35;
-        font-weight: 500;
-        border: 1px solid #f5e6d3;
-        border-bottom: 1px solid #ffffff;
-    }
-
-    .sidebar-header {
-        padding: 2rem 1.5rem 1.5rem;
-        border-bottom: 2px solid #f5e6d3;
-        background: #ffffff;
-    }
-
-    .sidebar-header.search-view {
-        padding-bottom: 1.5rem;
-    }
-
-    .editable-heading {
-        font-size: 1.5rem;
-        font-weight: 400;
-        margin-bottom: 1.5rem;
-        color: #4a3f35;
-        cursor: text;
-        padding: 0.25rem;
-        border-radius: 6px;
-        transition: background 0.2s;
-        font-family: 'Caveat', cursive;
-    }
-
-    .editable-heading:hover {
-        background: rgba(245, 230, 211, 0.3);
-    }
-
-    .editable-heading[contenteditable="true"] {
-        outline: none;
-        background: rgba(245, 230, 211, 0.3);
-    }
-
-    .search-box {
-        margin-bottom: 1rem;
-        position: relative;
-    }
-
-    .search-box input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #f5e6d3;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        background: #fef9f3;
-        transition: all 0.2s;
-        font-family: inherit;
-        font-weight: 300;
-        color: #4a3f35;
-    }
-
-    .search-box input:focus {
-        outline: none;
-        border-color: #d4b896;
-        background: #ffffff;
-        box-shadow: 0 2px 8px rgba(139, 109, 83, 0.1);
-    }
-
-    .search-box input::placeholder {
-        color: #b39d88;
-    }
-
-    .place-search-box {
-        position: relative;
-    }
-
-    .place-search-box input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #f5e6d3;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        background: #fef9f3;
-        transition: all 0.2s;
-        font-family: inherit;
-        font-weight: 300;
-        color: #4a3f35;
-    }
-
-    .place-search-box input:focus {
-        outline: none;
-        border-color: #d4b896;
-        background: #ffffff;
-        box-shadow: 0 2px 8px rgba(139, 109, 83, 0.1);
-    }
-
-    .place-search-results {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        margin-top: 0.5rem;
-        background: #ffffff;
-        border: 2px solid #f5e6d3;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(139, 109, 83, 0.15);
-        max-height: 400px;
-        overflow-y: auto;
-        display: none;
-        z-index: 100;
-    }
-
-    .place-search-results.active {
-        display: block;
-    }
-
-    .place-result-item {
-        padding: 1rem 1.25rem;
-        cursor: pointer;
-        border-bottom: 1px solid #f5e6d3;
-        transition: background 0.2s;
-    }
-
-    .place-result-item:last-child {
-        border-bottom: none;
-    }
-
-    .place-result-item:hover {
-        background: rgba(245, 230, 211, 0.3);
-    }
-
-    .place-result-name {
-        font-weight: 500;
-        font-size: 0.875rem;
-        color: #4a3f35;
-        margin-bottom: 0.25rem;
-    }
-
-    .place-result-address {
-        font-size: 0.75rem;
-        color: #8b6d53;
-        font-weight: 300;
-    }
-
-    .pin-categories {
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    .pin-btn {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        border: 2px solid #f5e6d3;
-        background: #ffffff;
-        border-radius: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 400;
-        color: #8b6d53;
-        transition: all 0.2s;
-        letter-spacing: 0.01em;
-    }
-
-    .pin-btn:hover {
-        border-color: #d4b896;
-        background: rgba(245, 230, 211, 0.3);
-        transform: translateY(-1px);
-    }
-
-    .pin-btn.active {
-        background: #8b6d53;
-        border-color: #8b6d53;
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(139, 109, 83, 0.2);
-    }
-
-    .pin-color {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .visited .pin-color {
-        background: #8b6d53;
-    }
-
-    .plan-to-visit .pin-color {
-        background: #b39d88;
-    }
-
-    .tabs-section {
-        padding: 1rem 1.5rem 0.75rem;
-        border-bottom: 2px solid #f5e6d3;
-        background: #ffffff;
-    }
-
-    .tabs-container {
-        display: flex;
-        gap: 0.5rem;
-        overflow-x: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #f5e6d3 transparent;
-    }
-
-    .tabs-container::-webkit-scrollbar {
-        height: 4px;
-    }
-
-    .tabs-container::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .tabs-container::-webkit-scrollbar-thumb {
-        background: #f5e6d3;
-        border-radius: 2px;
-    }
-
-    .tab {
-        padding: 0.625rem 1rem;
-        border: 1px solid #f5e6d3;
-        background: #fef9f3;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: 400;
-        color: #8b6d53;
-        border-radius: 8px;
-        transition: all 0.2s;
-        white-space: nowrap;
-        position: relative;
-    }
-
-    .tab:hover {
-        background: rgba(245, 230, 211, 0.5);
-        color: #4a3f35;
-        transform: translateY(-1px);
-    }
-
-    .tab.active {
-        background: #8b6d53;
-        color: #ffffff;
-        border-color: #8b6d53;
-        box-shadow: 0 2px 8px rgba(139, 109, 83, 0.2);
-    }
-
-    .tab .delete-tab {
-        margin-left: 0.5rem;
-        opacity: 0;
-        transition: opacity 0.2s;
-        color: inherit;
-    }
-
-    .tab:hover .delete-tab {
-        opacity: 1;
-    }
-
-    .add-tab-btn {
-        padding: 0.625rem 1rem;
-        border: 1px dashed #d4b896;
-        background: transparent;
-        cursor: pointer;
-        font-size: 0.875rem;
-        color: #b39d88;
-        border-radius: 8px;
-        transition: all 0.2s;
-        min-width: 36px;
-    }
-
-    .add-tab-btn:hover {
-        background: rgba(245, 230, 211, 0.3);
-        color: #8b6d53;
-        border-color: #8b6d53;
-    }
-
-    .locations-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 1.25rem 1.5rem;
-        background: #fef9f3;
-    }
-
-    .locations-list::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .locations-list::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .locations-list::-webkit-scrollbar-thumb {
-        background: #f5e6d3;
-        border-radius: 4px;
-    }
-
-    .locations-list::-webkit-scrollbar-thumb:hover {
-        background: #d4b896;
-    }
-
-    .location-card {
-        background: #ffffff;
-        border: 2px solid #f5e6d3;
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 2px 8px rgba(139, 109, 83, 0.08);
-    }
-
-    .location-card:hover {
-        border-color: #d4b896;
-        box-shadow: 0 4px 16px rgba(139, 109, 83, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .location-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 0.625rem;
-    }
-
-    .location-name {
-        font-weight: 500;
-        font-size: 0.9rem;
-        color: #4a3f35;
-    }
-
-    .rating {
-        color: #d4a574;
-        font-size: 0.8rem;
-        font-weight: 300;
-    }
-
-    .location-notes {
-        color: #8b6d53;
-        font-< !DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Map Journal</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Caveat:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fef9f3;
+            color: #4a3f35;
+            overflow: hidden;
+        }
+
+        header {
+            background: #fff9f0;
+            border-bottom: 2px solid #f5e6d3;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(139, 109, 83, 0.08);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #8b6d53;
+            text-shadow: 2px 2px 0px rgba(245, 230, 211, 0.5);
+            letter-spacing: 0.02em;
+        }
+
+        .header-title {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #8b6d53;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+            background: rgba(245, 230, 211, 0.3);
+            border: 1px dashed #d4b896;
+        }
+
+        .header-title:hover {
+            background: rgba(245, 230, 211, 0.6);
+        }
+
+        .header-title[contenteditable="true"] {
+            outline: none;
+            background: rgba(245, 230, 211, 0.6);
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #map {
+            flex: 1;
+            border-right: 2px solid #f5e6d3;
+            z-index: 1;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: #fff9f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: -4px 0 12px rgba(139, 109, 83, 0.1);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1.25rem 1.5rem 0;
+            border-bottom: 2px solid #f5e6d3;
+        }
+
+        .view-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #8b6d53;
+            border-radius: 12px 12px 0 0;
+            transition: all 0.2s;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .view-tab:hover {
+            background: rgba(245, 230, 211, 0.4);
+            color: #4a3f35;
+        }
+
+        .view-tab.active {
+            background: #ffffff;
+            color: #4a3f35;
+            font-weight: 500;
+            border: 1px solid #f5e6d3;
+            border-bottom: 1px solid #ffffff;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem 1.5rem;
+            border-bottom: 2px solid #f5e6d3;
+            background: #ffffff;
+        }
+
+        .sidebar-header.search-view {
+            padding-bottom: 1.5rem;
+        }
+
+        .editable-heading {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: #4a3f35;
+            cursor: text;
+            padding: 0.25rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-family: 'Caveat', cursive;
+        }
+
+        .editable-heading:hover {
+            background: rgba(245, 230, 211, 0.3);
+        }
+
+        .editable-heading[contenteditable="true"] {
+            outline: none;
+            background: rgba(245, 230, 211, 0.3);
+        }
+
+        .search-box {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #f5e6d3;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            background: #fef9f3;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: 300;
+            color: #4a3f35;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #d4b896;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(139, 109, 83, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: #b39d88;
+        }
+
+        .place-search-box {
+            position: relative;
+        }
+
+        .place-search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #f5e6d3;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            background: #fef9f3;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: 300;
+            color: #4a3f35;
+        }
+
+        .place-search-box input:focus {
+            outline: none;
+            border-color: #d4b896;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(139, 109, 83, 0.1);
+        }
+
+        .place-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: #ffffff;
+            border: 2px solid #f5e6d3;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(139, 109, 83, 0.15);
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .place-search-results.active {
+            display: block;
+        }
+
+        .place-result-item {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f5e6d3;
+            transition: background 0.2s;
+        }
+
+        .place-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .place-result-item:hover {
+            background: rgba(245, 230, 211, 0.3);
+        }
+
+        .place-result-name {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #4a3f35;
+            margin-bottom: 0.25rem;
+        }
+
+        .place-result-address {
+            font-size: 0.75rem;
+            color: #8b6d53;
+            font-weight: 300;
+        }
+
+        .pin-categories {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .pin-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #f5e6d3;
+            background: #ffffff;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #8b6d53;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
+        }
+
+        .pin-btn:hover {
+            border-color: #d4b896;
+            background: rgba(245, 230, 211, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .pin-btn.active {
+            background: #8b6d53;
+            border-color: #8b6d53;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(139, 109, 83, 0.2);
+        }
+
+        .pin-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .visited .pin-color {
+            background: #8b6d53;
+        }
+
+        .plan-to-visit .pin-color {
+            background: #b39d88;
+        }
+
+        .tabs-section {
+            padding: 1rem 1.5rem 0.75rem;
+            border-bottom: 2px solid #f5e6d3;
+            background: #ffffff;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #f5e6d3 transparent;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tabs-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .tabs-container::-webkit-scrollbar-thumb {
+            background: #f5e6d3;
+            border-radius: 2px;
+        }
+
+        .tab {
+            padding: 0.625rem 1rem;
+            border: 1px solid #f5e6d3;
+            background: #fef9f3;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #8b6d53;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(245, 230, 211, 0.5);
+            color: #4a3f35;
+            transform: translateY(-1px);
+        }
+
+        .tab.active {
+            background: #8b6d53;
+            color: #ffffff;
+            border-color: #8b6d53;
+            box-shadow: 0 2px 8px rgba(139, 109, 83, 0.2);
+        }
+
+        .tab .delete-tab {
+            margin-left: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: inherit;
+        }
+
+        .tab:hover .delete-tab {
+            opacity: 1;
+        }
+
+        .add-tab-btn {
+            padding: 0.625rem 1rem;
+            border: 1px dashed #d4b896;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #b39d88;
+            border-radius: 8px;
+            transition: all 0.2s;
+            min-width: 36px;
+        }
+
+        .add-tab-btn:hover {
+            background: rgba(245, 230, 211, 0.3);
+            color: #8b6d53;
+            border-color: #8b6d53;
+        }
+
+        .locations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem 1.5rem;
+            background: #fef9f3;
+        }
+
+        .locations-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .locations-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .locations-list::-webkit-scrollbar-thumb {
+            background: #f5e6d3;
+            border-radius: 4px;
+        }
+
+        .locations-list::-webkit-scrollbar-thumb:hover {
+            background: #d4b896;
+        }
+
+        .location-card {
+            background: #ffffff;
+            border: 2px solid #f5e6d3;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(139, 109, 83, 0.08);
+        }
+
+        .location-card:hover {
+            border-color: #d4b896;
+            box-shadow: 0 4px 16px rgba(139, 109, 83, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.625rem;
+        }
+
+        .location-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #4a3f35;
+        }
+
+        .rating {
+            color: #d4a574;
+            font-size: 0.8rem;
+            font-weight: 300;
+        }
+
+        .location-notes {
+            color: #8b6d53;
+            font-<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Journal</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
@@ -891,13 +899,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal.active {
@@ -921,7 +924,6 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1133,9 +1135,8 @@
             border-radius: 8px;
             margin-top: 0.5rem;
         }
-</style>
+    </style>
 </head>
-
 <body>
     <header>
         <div class="header-title" contenteditable="true" id="pageTitle">welcome to your world</div>
@@ -1143,7 +1144,7 @@
 
     <div class="container">
         <div id="map"></div>
-
+        
         <div class="sidebar">
             <div class="view-toggle">
                 <button class="view-tab" id="searchViewTab">search places</button>
@@ -1188,19 +1189,17 @@
                     <button class="add-tab-btn" id="addTabBtn">+</button>
                 </div>
             </div>
-
+            
             <div class="locations-list" id="locationsList">
                 <div class="empty-state">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <p>click on the map to add a location</p>
                 </div>
             </div>
-
+            
             <button class="clear-btn" id="clearBtn">clear all pins</button>
         </div>
     </div>
@@ -1208,7 +1207,7 @@
     <div class="modal" id="locationModal">
         <div class="modal-content">
             <div class="modal-header">add location</div>
-
+            
             <div class="form-group">
                 <label>location name</label>
                 <input type="text" id="locationName" placeholder="e.g., local cafe">
@@ -1222,7 +1221,7 @@
                     <option value="places">places</option>
                 </select>
             </div>
-
+            
             <div class="form-group">
                 <label>rating</label>
                 <div class="star-rating" id="starRating">
@@ -1233,12 +1232,12 @@
                     <span class="star" data-rating="5">★</span>
                 </div>
             </div>
-
+            
             <div class="form-group">
                 <label>notes</label>
                 <textarea id="locationNotes" placeholder="add your thoughts..."></textarea>
             </div>
-
+            
             <div class="form-group">
                 <label>photo</label>
                 <div class="image-upload" id="imageUpload">
@@ -1247,7 +1246,7 @@
                 </div>
                 <input type="file" id="imageInput" accept="image/*" style="display: none;">
             </div>
-
+            
             <div class="modal-actions">
                 <button class="btn-secondary" id="cancelBtn">cancel</button>
                 <button class="btn-primary" id="saveBtn">save</button>
@@ -1258,21 +1257,21 @@
     <div class="modal" id="viewLocationModal">
         <div class="modal-content">
             <div class="modal-header" id="viewLocationName">Location Details</div>
-
+            
             <div class="form-group">
                 <label>rating</label>
                 <div class="rating" id="viewLocationRating"></div>
             </div>
-
+            
             <div class="form-group" id="viewLocationNotesGroup" style="display: none;">
                 <label>notes</label>
                 <div id="viewLocationNotes" class="detail-content"></div>
             </div>
-
+            
             <div class="form-group" id="viewLocationImageGroup" style="display: none;">
                 <img id="viewLocationImage" class="detail-image">
             </div>
-
+            
             <div class="modal-actions">
                 <button class="btn-danger" id="deleteLocationBtn">delete pin</button>
                 <button class="btn-primary" id="closeViewBtn">close</button>
@@ -1283,12 +1282,12 @@
     <div class="modal" id="newFolderModal">
         <div class="modal-content">
             <div class="modal-header">create folder</div>
-
+            
             <div class="form-group">
                 <label>folder name</label>
                 <input type="text" id="newFolderName" placeholder="e.g., museums">
             </div>
-
+            
             <div class="modal-actions">
                 <button class="btn-secondary" id="cancelFolderBtn">cancel</button>
                 <button class="btn-primary" id="createFolderBtn">create</button>
@@ -1349,7 +1348,7 @@
         // Switch between search and spots view
         function switchView(view) {
             currentView = view;
-
+            
             if (view === 'search') {
                 document.getElementById('searchViewTab').classList.add('active');
                 document.getElementById('spotsViewTab').classList.remove('active');
@@ -1412,24 +1411,24 @@
         function handlePlaceSelection(item, container) {
             const lat = parseFloat(item.dataset.lat);
             const lon = parseFloat(item.dataset.lon);
-
+            
             // Move map to location
             map.setView([lat, lon], 15);
-
+            
             // Remove previous temp marker if exists
             if (tempMarker) {
                 map.removeLayer(tempMarker);
             }
-
+            
             // Add temporary marker (does NOT open modal)
             tempMarker = L.marker([lat, lon], {
                 icon: createIcon('#a8a29e')
             }).addTo(map);
-
+            
             // Clear search
             document.getElementById('placeSearchInput').value = '';
             container.classList.remove('active');
-
+            
             // Stay on search view
         }
 
@@ -1438,7 +1437,7 @@
             map = L.map('map', {
                 zoomControl: false
             }).setView([43.6532, -79.3832], 13);
-
+            
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
@@ -1453,7 +1452,7 @@
                 map.invalidateSize();
             }, 250);
 
-            map.on('click', function (e) {
+            map.on('click', function(e) {
                 currentMarker = {
                     lat: e.latlng.lat,
                     lng: e.latlng.lng,
@@ -1504,7 +1503,7 @@
         function closeModal() {
             document.getElementById('locationModal').classList.remove('active');
             currentMarker = null;
-
+            
             // Remove temp marker if user cancels
             if (tempMarker) {
                 map.removeLayer(tempMarker);
@@ -1514,25 +1513,25 @@
 
         function openLocationDetails(locationData) {
             currentLocationData = locationData;
-
+            
             document.getElementById('viewLocationName').textContent = locationData.name;
-            document.getElementById('viewLocationRating').textContent =
+            document.getElementById('viewLocationRating').textContent = 
                 '★'.repeat(locationData.rating) + '☆'.repeat(5 - locationData.rating);
-
+            
             if (locationData.notes) {
                 document.getElementById('viewLocationNotes').textContent = locationData.notes;
                 document.getElementById('viewLocationNotesGroup').style.display = 'block';
             } else {
                 document.getElementById('viewLocationNotesGroup').style.display = 'none';
             }
-
+            
             if (locationData.image) {
                 document.getElementById('viewLocationImage').src = locationData.image;
                 document.getElementById('viewLocationImageGroup').style.display = 'block';
             } else {
                 document.getElementById('viewLocationImageGroup').style.display = 'none';
             }
-
+            
             document.getElementById('viewLocationModal').classList.add('active');
         }
 
@@ -1543,9 +1542,9 @@
 
         function deleteCurrentLocation() {
             if (!currentLocationData) return;
-
+            
             if (!confirm(`Delete "${currentLocationData.name}"? This cannot be undone.`)) return;
-
+            
             // Find and remove marker
             const index = markers.findIndex(m => m.data === currentLocationData);
             if (index !== -1) {
@@ -1554,7 +1553,7 @@
                 saveToStorage();
                 renderLocations();
             }
-
+            
             closeViewModal();
         }
 
@@ -1581,7 +1580,7 @@
         function updateFolderSelect() {
             const select = document.getElementById('folderSelect');
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
-
+            
             select.innerHTML = folders.filter(f => f !== 'all').map(folder => {
                 const name = customFolders[folder]?.name || folder;
                 return `<option value="${folder}">${name}</option>`;
@@ -1597,14 +1596,14 @@
             }
 
             const folderId = name.replace(/\s+/g, '-');
-
+            
             if (folders.includes(folderId)) {
                 alert('a folder with this name already exists');
                 return;
             }
 
             folders.push(folderId);
-
+            
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
             customFolders[folderId] = { name };
             localStorage.setItem('customFolders', JSON.stringify(customFolders));
@@ -1615,7 +1614,7 @@
 
         function deleteFolder(folderId, event) {
             event.stopPropagation();
-
+            
             if (['all', 'food', 'views', 'places'].includes(folderId)) {
                 alert('cannot delete default folders');
                 return;
@@ -1634,7 +1633,7 @@
             saveToStorage();
 
             folders = folders.filter(f => f !== folderId);
-
+            
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
             delete customFolders[folderId];
             localStorage.setItem('customFolders', JSON.stringify(customFolders));
@@ -1653,12 +1652,12 @@
                 const name = customFolders[folder]?.name || folder;
                 const isCustom = !['all', 'food', 'views', 'places'].includes(folder);
                 const deleteBtn = isCustom ? `<span class="delete-tab" onclick="deleteTab('${folder}', event)">×</span>` : '';
-
+                
                 return `<button class="tab ${folder === currentFolder ? 'active' : ''}" data-folder="${folder}">${name}${deleteBtn}</button>`;
             }).join('');
 
             document.getElementById('tabsContainer').innerHTML = tabsHtml + '<button class="add-tab-btn" id="addTabBtn">+</button>';
-
+            
             // Re-attach event listeners
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
@@ -1704,7 +1703,7 @@
             }).addTo(map);
 
             // Add click listener to marker
-            marker.on('click', function (e) {
+            marker.on('click', function(e) {
                 L.DomEvent.stopPropagation(e);
                 openLocationDetails(location);
             });
@@ -1718,14 +1717,14 @@
         function renderLocations() {
             const list = document.getElementById('locationsList');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-
+            
             const filteredMarkers = markers.filter(({ data }) => {
                 const matchesSearch = data.name.toLowerCase().includes(searchTerm) ||
                     (data.notes && data.notes.toLowerCase().includes(searchTerm));
                 const matchesFolder = currentFolder === 'all' || data.folder === currentFolder;
                 return matchesSearch && matchesFolder;
             });
-
+            
             if (filteredMarkers.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
@@ -1779,13 +1778,13 @@
                     const marker = L.marker([data.lat, data.lng], {
                         icon: createIcon(pinCategories[data.category].color)
                     }).addTo(map);
-
+                    
                     // Add click listener to marker
-                    marker.on('click', function (e) {
+                    marker.on('click', function(e) {
                         L.DomEvent.stopPropagation(e);
                         openLocationDetails(data);
                     });
-
+                    
                     markers.push({ marker, data });
                 });
                 renderLocations();
@@ -1802,7 +1801,7 @@
         }
 
         // Event listeners
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             initMap();
             loadFolders();
             loadPins();
@@ -1817,7 +1816,7 @@
 
             // Star rating
             document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function () {
+                star.addEventListener('click', function() {
                     selectedRating = parseInt(this.dataset.rating);
                     updateStars();
                 });
@@ -1828,11 +1827,11 @@
                 document.getElementById('imageInput').click();
             });
 
-            document.getElementById('imageInput').addEventListener('change', function (e) {
+            document.getElementById('imageInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function (e) {
+                    reader.onload = function(e) {
                         const preview = document.getElementById('imagePreview');
                         preview.src = e.target.result;
                         preview.style.display = 'block';
@@ -1851,7 +1850,7 @@
             document.getElementById('deleteLocationBtn').addEventListener('click', deleteCurrentLocation);
 
             // Page title editing
-            document.getElementById('pageTitle').addEventListener('blur', function () {
+            document.getElementById('pageTitle').addEventListener('blur', function() {
                 localStorage.setItem('pageTitle', this.textContent);
             });
 
@@ -1862,7 +1861,7 @@
             }
 
             // Place search in sidebar with debounce
-            document.getElementById('placeSearchInput').addEventListener('input', function (e) {
+            document.getElementById('placeSearchInput').addEventListener('input', function(e) {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     searchPlaces(e.target.value, document.getElementById('placeSearchResults'));
@@ -1874,9 +1873,9 @@
             document.getElementById('spotsViewTab').addEventListener('click', () => switchView('spots'));
 
             // Close search results when clicking outside
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function(e) {
                 const placeSearchBox = document.querySelector('.place-search-box');
-
+                
                 if (placeSearchBox && !placeSearchBox.contains(e.target)) {
                     document.getElementById('placeSearchResults').classList.remove('active');
                 }
@@ -1884,5 +1883,4 @@
         });
     </script>
 </body>
-
 </html>
