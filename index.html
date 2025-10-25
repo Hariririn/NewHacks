@@ -1,149 +1,984 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footprint</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        #map {
+            flex: 1;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar {
+            width: 420px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 2rem 2rem 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            color: #1a1a2e;
+            letter-spacing: -0.02em;
+        }
+
+        .search-box {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: #a0a0b8;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .pin-categories {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .pin-btn {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.15);
+            background: white;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a4a68;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pin-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .pin-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .pin-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .visited .pin-color {
+            background: #4CAF50;
+        }
+
+        .plan-to-visit .pin-color {
+            background: #2196F3;
+        }
+
+        .tabs-section {
+            padding: 1rem 1.5rem 0.5rem;
+            background: white;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 0.5rem;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 0.625rem 1rem;
+            border: none;
+            background: #f5f5fa;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b6b8c;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #eeeef5;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab .delete-tab {
+            margin-left: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tab:hover .delete-tab {
+            opacity: 1;
+        }
+
+        .tab .delete-tab:hover {
+            color: #ff6b6b;
+        }
+
+        .add-tab-btn {
+            padding: 0.625rem 1rem;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #667eea;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 44px;
+        }
+
+        .add-tab-btn:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .locations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .locations-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .locations-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .locations-list::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 4px;
+        }
+
+        .locations-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .location-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(102, 126, 234, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .location-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.625rem;
+        }
+
+        .location-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #1a1a2e;
+            letter-spacing: -0.01em;
+        }
+
+        .rating {
+            color: #ffc107;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+
+        .location-notes {
+            color: #6b6b8c;
+            font-size: 0.875rem;
+            margin-bottom: 0.625rem;
+            line-height: 1.6;
+        }
+
+        .location-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 0.75rem;
+        }
+
+        .clear-btn {
+            margin: 1rem 1.5rem 1.5rem;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(238, 90, 111, 0.3);
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(238, 90, 111, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #1a1a2e;
+            letter-spacing: -0.02em;
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.625rem;
+            font-weight: 600;
+            color: #4a4a68;
+            font-size: 0.9rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.15);
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.375rem;
+            font-size: 2rem;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #e8e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .star:hover {
+            transform: scale(1.15);
+        }
+
+        .star.active,
+        .star:hover {
+            color: #ffc107;
+        }
+
+        .image-upload {
+            border: 2px dashed rgba(102, 126, 234, 0.25);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(102, 126, 234, 0.02);
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .image-upload p {
+            color: #6b6b8c;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 240px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5fa;
+            color: #4a4a68;
+        }
+
+        .btn-secondary:hover {
+            background: #eeeef5;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #a0a0b8;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            opacity: 0.25;
+            stroke: #667eea;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Interactive Map</h1>
-    <div id="map"></div>
-    <div class="map-controls">
-        <div class="pin-categories">
-            <button class="pin-btn visited active" onclick="setActiveCategory('visited')">
-                <span class="pin-color"></span>
-                Visited
-            </button>
-            <button class="pin-btn plan-to-visit" onclick="setActiveCategory('plan-to-visit')">
-                <span class="pin-color"></span>
-                Plan to Visit
-            </button>
+    <header>
+        <h1>📍 Footprint</h1>
+    </header>
+
+    <div class="container">
+        <div id="map"></div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Your Locations</h2>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search locations..." onkeyup="filterLocations()">
+                </div>
+                <div class="pin-categories">
+                    <button class="pin-btn visited active" onclick="setActiveCategory('visited')">
+                        <span class="pin-color"></span>
+                        Visited
+                    </button>
+                    <button class="pin-btn plan-to-visit" onclick="setActiveCategory('plan-to-visit')">
+                        <span class="pin-color"></span>
+                        Plan to Visit
+                    </button>
+                </div>
+            </div>
+
+            <div class="tabs-section">
+                <div class="tabs-container" id="tabsContainer">
+                    <button class="tab active" data-folder="all" onclick="switchFolder('all')">All</button>
+                    <button class="tab" data-folder="food" onclick="switchFolder('food')">🍽️ Food</button>
+                    <button class="tab" data-folder="views" onclick="switchFolder('views')">🏞️ Views</button>
+                    <button class="tab" data-folder="stuff" onclick="switchFolder('stuff')">🎯 Stuff</button>
+                    <button class="add-tab-btn" onclick="openNewFolderModal()">+</button>
+                </div>
+            </div>
+
+            <div class="locations-list" id="locationsList">
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p>Click on the map to add your first location!</p>
+                </div>
+            </div>
+
+            <button class="clear-btn" onclick="clearPins()">Clear All Pins</button>
         </div>
-        <button class="clear-btn" onclick="clearPins()">Clear All Pins</button>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-    <script>
-        // Wait for the DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the map
-            const map = L.map('map').setView([43.6532, -79.3832], 13);
+    <div class="modal" id="locationModal">
+        <div class="modal-content">
+            <div class="modal-header">Add Location</div>
 
-            // Add the OpenStreetMap tiles
+            <div class="form-group">
+                <label>Location Name</label>
+                <input type="text" id="locationName" placeholder="e.g., Eiffel Tower">
+            </div>
+
+            <div class="form-group">
+                <label>Folder</label>
+                <select id="folderSelect">
+                    <option value="food">🍽️ Food</option>
+                    <option value="views">🏞️ Views</option>
+                    <option value="stuff">🎯 Stuff</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="star-rating" id="starRating">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="locationNotes" placeholder="Share your experience..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Photo</label>
+                <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                    <p>📸 Click to upload a photo</p>
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveLocation()">Save Location</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="newFolderModal">
+        <div class="modal-content">
+            <div class="modal-header">Create Folder</div>
+
+            <div class="form-group">
+                <label>Folder Name</label>
+                <input type="text" id="newFolderName" placeholder="e.g., Museums">
+            </div>
+
+            <div class="form-group">
+                <label>Emoji (optional)</label>
+                <input type="text" id="newFolderEmoji" placeholder="🏛️" maxlength="2">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeNewFolderModal()">Cancel</button>
+                <button class="btn-primary" onclick="createNewFolder()">Create Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script>
+        let map, activeCategory = 'visited', markers = [], currentMarker = null, selectedRating = 0;
+        let currentFolder = 'all';
+        let folders = ['all', 'food', 'views', 'stuff'];
+
+        const pinCategories = {
+            'visited': { color: '#4CAF50' },
+            'plan-to-visit': { color: '#2196F3' }
+        };
+
+        const defaultFolderEmojis = {
+            'all': '',
+            'food': '🍽️',
+            'views': '🏞️',
+            'stuff': '🎯'
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            map = L.map('map').setView([43.6532, -79.3832], 13);
+
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            // Ensure Leaflet recalculates size when the container is resized.
-            // Use ResizeObserver when available so user CSS-resize actions invalidate the map.
-            function ensureMapInvalidation(mapEl) {
-                if (window.ResizeObserver) {
-                    const ro = new ResizeObserver(() => {
-                        // small timeout so leaflet recalculates after layout stabilizes
-                        setTimeout(() => { map.invalidateSize(); }, 0);
-                    });
-                    ro.observe(mapEl);
-                } else {
-                    // Fallback: at least update on window resize
-                    window.addEventListener('resize', () => { map.invalidateSize(); });
-                }
-            }
+            setTimeout(() => map.invalidateSize(), 100);
 
-            // Run initial invalidation after map is ready
-            setTimeout(() => { map.invalidateSize(); }, 0);
-            ensureMapInvalidation(document.getElementById('map'));
+            map.on('click', function (e) {
+                currentMarker = {
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                    category: activeCategory
+                };
+                openModal();
+            });
 
-            // Setup pin categories
-            const pinCategories = {
-                'visited': {
-                    color: '#4CAF50',
-                    icon: null // Will be initialized below
-                },
-                'plan-to-visit': {
-                    color: '#2196F3',
-                    icon: null
-                }
-            };
-
-            // Create custom icons for each category
-            Object.keys(pinCategories).forEach(category => {
-                pinCategories[category].icon = L.divIcon({
-                    className: 'custom-pin',
-                    html: `<svg width="25" height="41" viewBox="0 0 100 100">
-                        <path d="M50 0C30 0 12.5 17.5 12.5 37.5C12.5 62.5 50 100 50 100S87.5 62.5 87.5 37.5C87.5 17.5 70 0 50 0Z" 
-                        fill="${pinCategories[category].color}"/>
-                    </svg>`,
-                    iconSize: [25, 41],
-                    iconAnchor: [12.5, 41],
-                    popupAnchor: [0, -41]
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function () {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateStars();
                 });
             });
 
-            // Track active category and markers
-            let activeCategory = 'visited';
-            let markers = [];
-
-            // Set active pin category
-            window.setActiveCategory = function(category) {
-                // Update UI
-                document.querySelectorAll('.pin-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                document.querySelector(`.pin-btn.${category}`).classList.add('active');
-                
-                // Update active category
-                activeCategory = category;
-            };
-
-            // Load pins from localStorage
-            function loadPins() {
-                const savedPins = localStorage.getItem('mapPins');
-                if (savedPins) {
-                    const pins = JSON.parse(savedPins);
-                    pins.forEach(pin => {
-                        const marker = L.marker([pin.lat, pin.lng], {
-                            icon: pinCategories[pin.category].icon
-                        }).addTo(map);
-                        markers.push({ marker, category: pin.category });
-                    });
-                }
-            }
-
-            // Save pins to localStorage
-            function savePins() {
-                const pins = markers.map(({ marker, category }) => {
-                    const position = marker.getLatLng();
-                    return {
-                        lat: position.lat,
-                        lng: position.lng,
-                        category
+            document.getElementById('imageInput').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
                     };
-                });
-                localStorage.setItem('mapPins', JSON.stringify(pins));
-            }
-
-            // Clear all pins
-            window.clearPins = function() {
-                markers.forEach(({ marker }) => map.removeLayer(marker));
-                markers = [];
-                localStorage.removeItem('mapPins');
-            }
-
-            // Add click handler to map
-            map.on('click', function(e) {
-                const marker = L.marker(e.latlng, {
-                    icon: pinCategories[activeCategory].icon
-                }).addTo(map);
-                markers.push({ marker, category: activeCategory });
-                savePins();
+                    reader.readAsDataURL(file);
+                }
             });
 
-            // Load saved pins when the page loads
+            loadFolders();
             loadPins();
         });
+
+        function createIcon(color) {
+            return L.divIcon({
+                className: 'custom-pin',
+                html: `<svg width="25" height="41" viewBox="0 0 100 100">
+                    <path d="M50 0C30 0 12.5 17.5 12.5 37.5C12.5 62.5 50 100 50 100S87.5 62.5 87.5 37.5C87.5 17.5 70 0 50 0Z" 
+                    fill="${color}"/>
+                </svg>`,
+                iconSize: [25, 41],
+                iconAnchor: [12.5, 41]
+            });
+        }
+
+        function setActiveCategory(category) {
+            document.querySelectorAll('.pin-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.pin-btn.${category}`).classList.add('active');
+            activeCategory = category;
+        }
+
+        function switchFolder(folder) {
+            currentFolder = folder;
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.tab[data-folder="${folder}"]`).classList.add('active');
+            renderLocations();
+        }
+
+        function openModal() {
+            document.getElementById('locationModal').classList.add('active');
+            document.getElementById('locationName').value = '';
+            document.getElementById('locationNotes').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageInput').value = '';
+            selectedRating = 0;
+            updateStars();
+            updateFolderSelect();
+        }
+
+        function closeModal() {
+            document.getElementById('locationModal').classList.remove('active');
+            currentMarker = null;
+        }
+
+        function openNewFolderModal() {
+            document.getElementById('newFolderModal').classList.add('active');
+            document.getElementById('newFolderName').value = '';
+            document.getElementById('newFolderEmoji').value = '';
+        }
+
+        function closeNewFolderModal() {
+            document.getElementById('newFolderModal').classList.remove('active');
+        }
+
+        function updateStars() {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                star.classList.toggle('active', index < selectedRating);
+            });
+        }
+
+        function updateFolderSelect() {
+            const select = document.getElementById('folderSelect');
+            const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
+
+            select.innerHTML = folders.filter(f => f !== 'all').map(folder => {
+                const emoji = customFolders[folder]?.emoji || defaultFolderEmojis[folder] || '';
+                const name = customFolders[folder]?.name || folder.charAt(0).toUpperCase() + folder.slice(1);
+                return `<option value="${folder}">${emoji} ${name}</option>`;
+            }).join('');
+        }
+
+        function createNewFolder() {
+            const name = document.getElementById('newFolderName').value.trim();
+            const emoji = document.getElementById('newFolderEmoji').value.trim();
+
+            if (!name) {
+                alert('Please enter a folder name');
+                return;
+            }
+
+            const folderId = name.toLowerCase().replace(/\s+/g, '-');
+
+            if (folders.includes(folderId)) {
+                alert('A folder with this name already exists');
+                return;
+            }
+
+            folders.push(folderId);
+
+            const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
+            customFolders[folderId] = { name, emoji };
+            localStorage.setItem('customFolders', JSON.stringify(customFolders));
+
+            renderTabs();
+            closeNewFolderModal();
+        }
+
+        function deleteFolder(folderId, event) {
+            event.stopPropagation();
+
+            if (['all', 'food', 'views', 'stuff'].includes(folderId)) {
+                alert('Cannot delete default folders');
+                return;
+            }
+
+            if (!confirm(`Delete folder "${folderId}"? Locations in this folder will not be deleted.`)) {
+                return;
+            }
+
+            folders = folders.filter(f => f !== folderId);
+
+            const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
+            delete customFolders[folderId];
+            localStorage.setItem('customFolders', JSON.stringify(customFolders));
+
+            if (currentFolder === folderId) {
+                switchFolder('all');
+            }
+
+            renderTabs();
+        }
+
+        function renderTabs() {
+            const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
+            const tabsHtml = folders.map(folder => {
+                const emoji = customFolders[folder]?.emoji || defaultFolderEmojis[folder] || '';
+                const name = customFolders[folder]?.name || folder.charAt(0).toUpperCase() + folder.slice(1);
+                const isCustom = !['all', 'food', 'views', 'stuff'].includes(folder);
+                const deleteBtn = isCustom ? `<span class="delete-tab" onclick="deleteFolder('${folder}', event)">×</span>` : '';
+
+                return `<button class="tab ${folder === currentFolder ? 'active' : ''}" data-folder="${folder}" onclick="switchFolder('${folder}')">${emoji} ${name}${deleteBtn}</button>`;
+            }).join('');
+
+            document.getElementById('tabsContainer').innerHTML = tabsHtml + '<button class="add-tab-btn" onclick="openNewFolderModal()">+</button>';
+        }
+
+        function saveLocation() {
+            const name = document.getElementById('locationName').value.trim();
+            const notes = document.getElementById('locationNotes').value.trim();
+            const folder = document.getElementById('folderSelect').value;
+            const imagePreview = document.getElementById('imagePreview');
+            const image = imagePreview.style.display !== 'none' ? imagePreview.src : null;
+
+            if (!name) {
+                alert('Please enter a location name');
+                return;
+            }
+
+            const location = {
+                ...currentMarker,
+                name,
+                rating: selectedRating,
+                notes,
+                image,
+                folder,
+                timestamp: Date.now()
+            };
+
+            const marker = L.marker([location.lat, location.lng], {
+                icon: createIcon(pinCategories[location.category].color)
+            }).addTo(map);
+
+            markers.push({ marker, data: location });
+            savePins();
+            renderLocations();
+            closeModal();
+        }
+
+        function renderLocations() {
+            const list = document.getElementById('locationsList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            const filteredMarkers = markers.filter(({ data }) => {
+                const matchesSearch = data.name.toLowerCase().includes(searchTerm) ||
+                    (data.notes && data.notes.toLowerCase().includes(searchTerm));
+                const matchesFolder = currentFolder === 'all' || data.folder === currentFolder;
+                return matchesSearch && matchesFolder;
+            });
+
+            if (filteredMarkers.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <p>${markers.length === 0 ? 'Click on the map to add your first location!' : 'No locations match your search or folder'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filteredMarkers.map(({ data }) => {
+                const index = markers.findIndex(m => m.data === data);
+                return `
+                    <div class="location-card" onclick="focusLocation(${index})">
+                        <div class="location-header">
+                            <div class="location-name">${data.name}</div>
+                            <div class="rating">${'★'.repeat(data.rating)}${'☆'.repeat(5 - data.rating)}</div>
+                        </div>
+                        ${data.notes ? `<div class="location-notes">${data.notes}</div>` : ''}
+                        ${data.image ? `<img src="${data.image}" class="location-image" alt="${data.name}">` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterLocations() {
+            renderLocations();
+        }
+
+        function focusLocation(index) {
+            const { marker } = markers[index];
+            map.setView(marker.getLatLng(), 15);
+        }
+
+        function savePins() {
+            const data = markers.map(({ data }) => data);
+            localStorage.setItem('footprintLocations', JSON.stringify(data));
+        }
+
+        function loadFolders() {
+            const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
+            folders = ['all', 'food', 'views', 'stuff', ...Object.keys(customFolders)];
+            renderTabs();
+        }
+
+        function loadPins() {
+            const saved = localStorage.getItem('footprintLocations');
+            if (saved) {
+                const locations = JSON.parse(saved);
+                locations.forEach(data => {
+                    const marker = L.marker([data.lat, data.lng], {
+                        icon: createIcon(pinCategories[data.category].color)
+                    }).addTo(map);
+                    markers.push({ marker, data });
+                });
+                renderLocations();
+            }
+        }
+
+        function clearPins() {
+            if (!confirm('Clear all locations? This cannot be undone.')) return;
+            markers.forEach(({ marker }) => map.removeLayer(marker));
+            markers = [];
+            localStorage.removeItem('footprintLocations');
+            renderLocations();
+        }
     </script>
 </body>
+
 </html>
