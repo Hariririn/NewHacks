@@ -11,8 +11,8 @@ let map;
         let currentLocationData = null;
 
         const pinCategories = {
-            'visited': { color: '#1c1917' },
-            'plan-to-visit': { color: '#78716c' }
+            'visited': { color: getComputedStyle(document.documentElement).getPropertyValue('--pin-visited').trim() },
+            'plan-to-visit': { color: getComputedStyle(document.documentElement).getPropertyValue('--pin-to-visit').trim() }
         };
 
         // Switch between search and spots view
@@ -458,7 +458,28 @@ let map;
         }
 
         // Event listeners
+        // Theme management
+        function initTheme() {
+            // Check for saved theme preference or use system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            initTheme();
             initMap();
             loadFolders();
             loadPins();
@@ -516,6 +537,9 @@ let map;
             if (savedTitle) {
                 document.getElementById('pageTitle').textContent = savedTitle;
             }
+
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
             // Place search in sidebar with debounce
             document.getElementById('placeSearchInput').addEventListener('input', function (e) {
