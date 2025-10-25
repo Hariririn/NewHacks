@@ -193,7 +193,7 @@
             background: var(--surface);
             transition: all 0.2s;
             font-family: inherit;
-            font-weight: 400;
+            font-weight: 600;
             color: var(--text);
         }
 
@@ -214,13 +214,14 @@
         .place-search-box input {
             width: 100%;
             padding: 0.625rem 0.875rem;
-            border: 1px solid #e7e5e4;
+            border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 0.875rem;
-            background: #fafaf9;
+            background: var(--surface);
             transition: all 0.2s;
             font-family: inherit;
-            font-weight: 300;
+            font-weight: 600;
+            color: var(--text);
         }
 
         .place-search-box input:focus {
