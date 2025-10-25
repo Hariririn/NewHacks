@@ -132,7 +132,7 @@
             background: transparent;
             cursor: pointer;
             font-size: 0.75rem;
-            font-weight: 400;
+            font-weight: 600;
             color: var(--text-secondary);
             border-radius: 6px 6px 0 0;
             transition: all 0.2s;
