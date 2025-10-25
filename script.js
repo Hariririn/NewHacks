@@ -149,6 +149,7 @@ let map;
             document.querySelectorAll('.pin-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.category === category);
             });
+            renderLocations(); // Re-render locations to update filtering and marker visibility
         }
 
         function switchFolder(folder) {
@@ -373,7 +374,8 @@ let map;
                 const matchesSearch = data.name.toLowerCase().includes(searchTerm) ||
                     (data.notes && data.notes.toLowerCase().includes(searchTerm));
                 const matchesFolder = currentFolder === 'all' || data.folder === currentFolder;
-                return matchesSearch && matchesFolder;
+                const matchesCategory = activeCategory === 'all' || data.category === activeCategory;
+                return matchesSearch && matchesFolder && matchesCategory;
             });
 
             if (filteredMarkers.length === 0) {
@@ -391,6 +393,8 @@ let map;
 
             list.innerHTML = filteredMarkers.map(({ data }) => {
                 const index = markers.findIndex(m => m.data === data);
+                // Update marker visibility based on active category
+                markers[index].marker.setOpacity(data.category === activeCategory || activeCategory === 'all' ? 1 : 0.3);
                 return `
                     <div class="location-card" data-index="${index}">
                         <div class="location-header">
