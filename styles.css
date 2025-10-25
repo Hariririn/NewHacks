@@ -92,8 +92,21 @@
 
         #map {
             flex: 1;
-            border-right: 1px solid #e7e5e4;
+            border-right: 1px solid var(--border);
             z-index: 1;
+            position: relative;
+        }
+
+        [data-theme="dark"] #map::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.25);
+            pointer-events: none;
+            z-index: 401;
         }
 
         .sidebar {
@@ -808,6 +821,10 @@
 
         .leaflet-container {
             background: var(--background) !important;
+        }
+
+        [data-theme="dark"] .leaflet-tile {
+            filter: brightness(0.85) contrast(1.1) !important;
         }
 
         .leaflet-bottom.leaflet-right {
