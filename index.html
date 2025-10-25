@@ -710,6 +710,17 @@
             background: #fafaf9;
         }
 
+        .btn-danger {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+        }
+
         .empty-state {
             text-align: center;
             padding: 3rem 1.5rem;
@@ -874,6 +885,31 @@
         </div>
     </div>
 
+    <div class="modal" id="viewLocationModal">
+        <div class="modal-content">
+            <div class="modal-header" id="viewLocationName">Location Details</div>
+
+            <div class="form-group">
+                <label>rating</label>
+                <div class="rating" id="viewLocationRating"></div>
+            </div>
+
+            <div class="form-group" id="viewLocationNotesGroup" style="display: none;">
+                <label>notes</label>
+                <div id="viewLocationNotes" style="color: #78716c; font-size: 0.875rem; line-height: 1.5;"></div>
+            </div>
+
+            <div class="form-group" id="viewLocationImageGroup" style="display: none;">
+                <img id="viewLocationImage" style="width: 100%; border-radius: 8px; margin-top: 0.5rem;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-danger" id="deleteLocationBtn">delete</button>
+                <button class="btn-primary" id="closeViewBtn">close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="newFolderModal">
         <div class="modal-content">
             <div class="modal-header">create folder</div>
@@ -902,6 +938,7 @@
         let searchTimeout;
         let tempMarker = null;
         let currentView = 'spots';
+        let currentLocationData = null;
 
         const pinCategories = {
             'visited': { color: '#1c1917' },
@@ -992,8 +1029,7 @@
             document.getElementById('placeSearchInput').value = '';
             container.classList.remove('active');
 
-            // Switch back to spots view so user can see the map
-            switchView('spots');
+            // Stay on search view
         }
 
         // Initialize map
@@ -1073,6 +1109,52 @@
                 map.removeLayer(tempMarker);
                 tempMarker = null;
             }
+        }
+
+        function openLocationDetails(locationData) {
+            currentLocationData = locationData;
+
+            document.getElementById('viewLocationName').textContent = locationData.name;
+            document.getElementById('viewLocationRating').textContent =
+                '★'.repeat(locationData.rating) + '☆'.repeat(5 - locationData.rating);
+
+            if (locationData.notes) {
+                document.getElementById('viewLocationNotes').textContent = locationData.notes;
+                document.getElementById('viewLocationNotesGroup').style.display = 'block';
+            } else {
+                document.getElementById('viewLocationNotesGroup').style.display = 'none';
+            }
+
+            if (locationData.image) {
+                document.getElementById('viewLocationImage').src = locationData.image;
+                document.getElementById('viewLocationImageGroup').style.display = 'block';
+            } else {
+                document.getElementById('viewLocationImageGroup').style.display = 'none';
+            }
+
+            document.getElementById('viewLocationModal').classList.add('active');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewLocationModal').classList.remove('active');
+            currentLocationData = null;
+        }
+
+        function deleteCurrentLocation() {
+            if (!currentLocationData) return;
+
+            if (!confirm(`delete "${currentLocationData.name}"?`)) return;
+
+            // Find and remove marker
+            const index = markers.findIndex(m => m.data === currentLocationData);
+            if (index !== -1) {
+                map.removeLayer(markers[index].marker);
+                markers.splice(index, 1);
+                savePins();
+                renderLocations();
+            }
+
+            closeViewModal();
         }
 
         function openNewFolderModal() {
@@ -1201,6 +1283,12 @@
                 icon: createIcon(pinCategories[location.category].color)
             }).addTo(map);
 
+            // Add click listener to marker
+            marker.on('click', function (e) {
+                L.DomEvent.stopPropagation(e);
+                openLocationDetails(location);
+            });
+
             markers.push({ marker, data: location });
             savePins();
             renderLocations();
@@ -1278,6 +1366,13 @@
                     const marker = L.marker([data.lat, data.lng], {
                         icon: createIcon(pinCategories[data.category].color)
                     }).addTo(map);
+
+                    // Add click listener to marker
+                    marker.on('click', function (e) {
+                        L.DomEvent.stopPropagation(e);
+                        openLocationDetails(data);
+                    });
+
                     markers.push({ marker, data });
                 });
                 renderLocations();
@@ -1338,6 +1433,8 @@
             document.getElementById('cancelFolderBtn').addEventListener('click', closeNewFolderModal);
             document.getElementById('createFolderBtn').addEventListener('click', createNewFolder);
             document.getElementById('clearBtn').addEventListener('click', clearPins);
+            document.getElementById('closeViewBtn').addEventListener('click', closeViewModal);
+            document.getElementById('deleteLocationBtn').addEventListener('click', deleteCurrentLocation);
 
             // Page title editing
             document.getElementById('pageTitle').addEventListener('blur', function () {
