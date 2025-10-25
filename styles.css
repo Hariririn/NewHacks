@@ -226,8 +226,9 @@
 
         .place-search-box input:focus {
             outline: none;
-            border-color: #d6d3d1;
-            background: #ffffff;
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .place-search-results {
