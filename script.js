@@ -542,6 +542,17 @@ let map;
                 document.getElementById('pageTitle').textContent = savedTitle;
             }
 
+            // Load saved search heading
+            const savedSearchHeading = localStorage.getItem('searchHeading');
+            if (savedSearchHeading) {
+                document.getElementById('searchHeading').textContent = savedSearchHeading;
+            }
+
+            // Save search heading on edit
+            document.getElementById('searchHeading').addEventListener('blur', function() {
+                localStorage.setItem('searchHeading', this.textContent);
+            });
+
             // Theme toggle
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
