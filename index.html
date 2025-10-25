@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Footprint</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+    <title>Map Journal</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
         * {
             margin: 0;
@@ -16,167 +16,173 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #fafaf9;
+            color: #1c1917;
             overflow: hidden;
         }
 
         header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            background: #ffffff;
+            border-bottom: 1px solid #e7e5e4;
             padding: 1rem 2rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: space-between;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+        .header-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #78716c;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .header-title:hover {
+            background: #f5f5f4;
+        }
+
+        .header-title[contenteditable="true"] {
+            outline: none;
+            background: #f5f5f4;
         }
 
         .container {
             display: flex;
             flex: 1;
             overflow: hidden;
-            padding: 1rem;
-            gap: 1rem;
         }
 
         #map {
             flex: 1;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-right: 1px solid #e7e5e4;
+            z-index: 1;
         }
 
         .sidebar {
-            width: 420px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 380px;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .sidebar-header {
-            padding: 2rem 2rem 1.5rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 2rem 1.5rem 1rem;
+            border-bottom: 1px solid #f5f5f4;
         }
 
-        .sidebar-header h2 {
+        .editable-heading {
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            color: #1a1a2e;
-            letter-spacing: -0.02em;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            color: #1c1917;
+            cursor: text;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .editable-heading:hover {
+            background: #fafaf9;
+        }
+
+        .editable-heading[contenteditable="true"] {
+            outline: none;
+            background: #fafaf9;
         }
 
         .search-box {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
             position: relative;
         }
 
         .search-box input {
             width: 100%;
-            padding: 0.875rem 1rem 0.875rem 3rem;
-            border: 2px solid rgba(102, 126, 234, 0.1);
-            border-radius: 16px;
-            font-size: 0.95rem;
-            background: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: #fafaf9;
+            transition: all 0.2s;
             font-family: inherit;
+            font-weight: 300;
         }
 
         .search-box input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #d6d3d1;
+            background: #ffffff;
         }
 
         .search-box input::placeholder {
-            color: #a0a0b8;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.1rem;
-            pointer-events: none;
+            color: #a8a29e;
         }
 
         .pin-categories {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .pin-btn {
             flex: 1;
-            padding: 0.875rem 1rem;
-            border: 2px solid rgba(102, 126, 234, 0.15);
-            background: white;
-            border-radius: 14px;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #e7e5e4;
+            background: transparent;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #4a4a68;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #78716c;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
         }
 
         .pin-btn:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            border-color: #d6d3d1;
+            background: #fafaf9;
         }
 
         .pin-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+            background: #1c1917;
+            border-color: #1c1917;
+            color: #ffffff;
         }
 
         .pin-color {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
 
         .visited .pin-color {
-            background: #4CAF50;
+            background: #1c1917;
         }
 
         .plan-to-visit .pin-color {
-            background: #2196F3;
+            background: #78716c;
         }
 
         .tabs-section {
-            padding: 1rem 1.5rem 0.5rem;
-            background: white;
+            padding: 1rem 1.5rem 0.75rem;
+            border-bottom: 1px solid #f5f5f4;
         }
 
         .tabs-container {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.25rem;
             overflow-x: auto;
             scrollbar-width: none;
-            padding-bottom: 0.5rem;
         }
 
         .tabs-container::-webkit-scrollbar {
@@ -184,35 +190,31 @@
         }
 
         .tab {
-            padding: 0.625rem 1rem;
+            padding: 0.5rem 0.75rem;
             border: none;
-            background: #f5f5fa;
+            background: transparent;
             cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #6b6b8c;
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #78716c;
+            border-radius: 4px;
+            transition: all 0.2s;
             white-space: nowrap;
             position: relative;
         }
 
         .tab:hover {
-            background: #eeeef5;
-            color: #667eea;
-            transform: translateY(-2px);
+            background: #fafaf9;
+            color: #1c1917;
         }
 
         .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: #f5f5f4;
+            color: #1c1917;
         }
 
         .tab .delete-tab {
             margin-left: 0.5rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -221,36 +223,31 @@
             opacity: 1;
         }
 
-        .tab .delete-tab:hover {
-            color: #ff6b6b;
-        }
-
         .add-tab-btn {
-            padding: 0.625rem 1rem;
-            border: 2px dashed rgba(102, 126, 234, 0.3);
+            padding: 0.5rem 0.75rem;
+            border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 1.2rem;
-            color: #667eea;
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 44px;
+            font-size: 0.875rem;
+            color: #a8a29e;
+            border-radius: 4px;
+            transition: all 0.2s;
+            min-width: 32px;
         }
 
         .add-tab-btn:hover {
-            background: rgba(102, 126, 234, 0.05);
-            border-color: #667eea;
-            transform: translateY(-2px);
+            background: #fafaf9;
+            color: #1c1917;
         }
 
         .locations-list {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
         }
 
         .locations-list::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .locations-list::-webkit-scrollbar-track {
@@ -258,83 +255,78 @@
         }
 
         .locations-list::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.2);
-            border-radius: 4px;
-        }
-
-        .locations-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.3);
+            background: #e7e5e4;
+            border-radius: 3px;
         }
 
         .location-card {
-            background: white;
-            border-radius: 18px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
+            background: #ffffff;
+            border: 1px solid #f5f5f4;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid rgba(102, 126, 234, 0.08);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s;
         }
 
         .location-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
-            border-color: rgba(102, 126, 234, 0.2);
+            border-color: #e7e5e4;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .location-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 0.625rem;
+            margin-bottom: 0.5rem;
         }
 
         .location-name {
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: #1a1a2e;
-            letter-spacing: -0.01em;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #1c1917;
         }
 
         .rating {
-            color: #ffc107;
-            font-size: 0.9rem;
-            letter-spacing: 0.05em;
+            color: #78716c;
+            font-size: 0.75rem;
+            font-weight: 300;
         }
 
         .location-notes {
-            color: #6b6b8c;
-            font-size: 0.875rem;
-            margin-bottom: 0.625rem;
-            line-height: 1.6;
+            color: #78716c;
+            font-size: 0.8rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
         }
 
         .location-image {
             width: 100%;
-            height: 180px;
+            height: 140px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 6px;
             margin-top: 0.75rem;
+            opacity: 0.9;
         }
 
         .clear-btn {
-            margin: 1rem 1.5rem 1.5rem;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            border: none;
-            border-radius: 14px;
+            margin: 0 1.5rem 1.5rem;
+            padding: 0.625rem;
+            background: transparent;
+            color: #78716c;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(238, 90, 111, 0.3);
+            font-weight: 400;
+            font-size: 0.75rem;
+            transition: all 0.2s;
         }
 
         .clear-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(238, 90, 111, 0.4);
+            background: #fafaf9;
+            border-color: #d6d3d1;
+            color: #1c1917;
         }
 
         .modal {
@@ -344,13 +336,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(26, 26, 46, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(28, 25, 23, 0.4);
+            backdrop-filter: blur(4px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.2s ease;
         }
 
         @keyframes fadeIn {
@@ -368,21 +359,21 @@
         }
 
         .modal-content {
-            background: white;
-            border-radius: 24px;
-            padding: 2.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
             width: 90%;
-            max-width: 520px;
+            max-width: 480px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.2s ease;
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
 
             to {
@@ -392,165 +383,168 @@
         }
 
         .modal-header {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: #1a1a2e;
-            letter-spacing: -0.02em;
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: #1c1917;
         }
 
         .form-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.625rem;
-            font-weight: 600;
-            color: #4a4a68;
-            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+            color: #78716c;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .form-group input[type="text"],
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid rgba(102, 126, 234, 0.15);
-            border-radius: 14px;
-            font-size: 0.95rem;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
+            font-size: 0.875rem;
             font-family: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
+            transition: all 0.2s;
+            background: #fafaf9;
+            font-weight: 300;
         }
 
         .form-group input[type="text"]:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #d6d3d1;
+            background: #ffffff;
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
-            line-height: 1.6;
+            min-height: 80px;
+            line-height: 1.5;
         }
 
         .star-rating {
             display: flex;
-            gap: 0.375rem;
-            font-size: 2rem;
+            gap: 0.25rem;
+            font-size: 1.5rem;
         }
 
         .star {
             cursor: pointer;
-            color: #e8e8f0;
+            color: #e7e5e4;
             transition: all 0.2s ease;
         }
 
         .star:hover {
-            transform: scale(1.15);
+            transform: scale(1.1);
         }
 
         .star.active,
         .star:hover {
-            color: #ffc107;
+            color: #1c1917;
         }
 
         .image-upload {
-            border: 2px dashed rgba(102, 126, 234, 0.25);
-            border-radius: 16px;
-            padding: 2.5rem;
+            border: 1px dashed #e7e5e4;
+            border-radius: 8px;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(102, 126, 234, 0.02);
+            transition: all 0.2s;
+            background: #fafaf9;
         }
 
         .image-upload:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-            transform: translateY(-2px);
+            border-color: #d6d3d1;
+            background: #f5f5f4;
         }
 
         .image-upload p {
-            color: #6b6b8c;
-            font-weight: 500;
-            font-size: 0.9rem;
+            color: #a8a29e;
+            font-weight: 300;
+            font-size: 0.8rem;
         }
 
         .image-preview {
             max-width: 100%;
-            max-height: 240px;
-            border-radius: 12px;
+            max-height: 200px;
+            border-radius: 8px;
             margin-top: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .modal-actions {
             display: flex;
-            gap: 1rem;
-            margin-top: 2.5rem;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
 
         .modal-actions button {
             flex: 1;
-            padding: 1rem;
-            border: none;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 0.75rem;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 400;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: #1c1917;
+            color: #ffffff;
+            border-color: #1c1917;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            background: #292524;
+            border-color: #292524;
         }
 
         .btn-secondary {
-            background: #f5f5fa;
-            color: #4a4a68;
+            background: transparent;
+            color: #78716c;
         }
 
         .btn-secondary:hover {
-            background: #eeeef5;
-            transform: translateY(-2px);
+            background: #fafaf9;
         }
 
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
-            color: #a0a0b8;
+            padding: 3rem 1.5rem;
+            color: #a8a29e;
         }
 
         .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1.5rem;
-            opacity: 0.25;
-            stroke: #667eea;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+            stroke: #78716c;
         }
 
         .empty-state p {
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 0.875rem;
+            font-weight: 300;
+        }
+
+        .leaflet-container {
+            background: #f5f5f4;
         }
     </style>
 </head>
 
 <body>
     <header>
-        <h1>📍 Footprint</h1>
+        <div class="header-title" contenteditable="true" id="pageTitle">welcome to your world</div>
     </header>
 
     <div class="container">
@@ -558,69 +552,68 @@
 
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2>Your Locations</h2>
+                <h2 class="editable-heading" contenteditable="true">my spots</h2>
                 <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Search locations..." onkeyup="filterLocations()">
+                    <input type="text" id="searchInput" placeholder="search locations...">
                 </div>
                 <div class="pin-categories">
-                    <button class="pin-btn visited active" onclick="setActiveCategory('visited')">
+                    <button class="pin-btn visited active" data-category="visited">
                         <span class="pin-color"></span>
-                        Visited
+                        visited
                     </button>
-                    <button class="pin-btn plan-to-visit" onclick="setActiveCategory('plan-to-visit')">
+                    <button class="pin-btn plan-to-visit" data-category="plan-to-visit">
                         <span class="pin-color"></span>
-                        Plan to Visit
+                        to visit
                     </button>
                 </div>
             </div>
 
             <div class="tabs-section">
                 <div class="tabs-container" id="tabsContainer">
-                    <button class="tab active" data-folder="all" onclick="switchFolder('all')">All</button>
-                    <button class="tab" data-folder="food" onclick="switchFolder('food')">🍽️ Food</button>
-                    <button class="tab" data-folder="views" onclick="switchFolder('views')">🏞️ Views</button>
-                    <button class="tab" data-folder="stuff" onclick="switchFolder('stuff')">🎯 Stuff</button>
-                    <button class="add-tab-btn" onclick="openNewFolderModal()">+</button>
+                    <button class="tab active" data-folder="all">all</button>
+                    <button class="tab" data-folder="food">food</button>
+                    <button class="tab" data-folder="views">views</button>
+                    <button class="tab" data-folder="places">places</button>
+                    <button class="add-tab-btn" id="addTabBtn">+</button>
                 </div>
             </div>
 
             <div class="locations-list" id="locationsList">
                 <div class="empty-state">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <p>Click on the map to add your first location!</p>
+                    <p>click on the map to add a location</p>
                 </div>
             </div>
 
-            <button class="clear-btn" onclick="clearPins()">Clear All Pins</button>
+            <button class="clear-btn" id="clearBtn">clear all pins</button>
         </div>
     </div>
 
     <div class="modal" id="locationModal">
         <div class="modal-content">
-            <div class="modal-header">Add Location</div>
+            <div class="modal-header">add location</div>
 
             <div class="form-group">
-                <label>Location Name</label>
-                <input type="text" id="locationName" placeholder="e.g., Eiffel Tower">
+                <label>location name</label>
+                <input type="text" id="locationName" placeholder="e.g., local cafe">
             </div>
 
             <div class="form-group">
-                <label>Folder</label>
+                <label>folder</label>
                 <select id="folderSelect">
-                    <option value="food">🍽️ Food</option>
-                    <option value="views">🏞️ Views</option>
-                    <option value="stuff">🎯 Stuff</option>
+                    <option value="food">food</option>
+                    <option value="views">views</option>
+                    <option value="places">places</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Rating</label>
+                <label>rating</label>
                 <div class="star-rating" id="starRating">
                     <span class="star" data-rating="1">★</span>
                     <span class="star" data-rating="2">★</span>
@@ -631,74 +624,69 @@
             </div>
 
             <div class="form-group">
-                <label>Notes</label>
-                <textarea id="locationNotes" placeholder="Share your experience..."></textarea>
+                <label>notes</label>
+                <textarea id="locationNotes" placeholder="add your thoughts..."></textarea>
             </div>
 
             <div class="form-group">
-                <label>Photo</label>
-                <div class="image-upload" onclick="document.getElementById('imageInput').click()">
-                    <p>📸 Click to upload a photo</p>
+                <label>photo</label>
+                <div class="image-upload" id="imageUpload">
+                    <p>click to upload</p>
                     <img id="imagePreview" class="image-preview" style="display: none;">
                 </div>
                 <input type="file" id="imageInput" accept="image/*" style="display: none;">
             </div>
 
             <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn-primary" onclick="saveLocation()">Save Location</button>
+                <button class="btn-secondary" id="cancelBtn">cancel</button>
+                <button class="btn-primary" id="saveBtn">save</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="newFolderModal">
         <div class="modal-content">
-            <div class="modal-header">Create Folder</div>
+            <div class="modal-header">create folder</div>
 
             <div class="form-group">
-                <label>Folder Name</label>
-                <input type="text" id="newFolderName" placeholder="e.g., Museums">
-            </div>
-
-            <div class="form-group">
-                <label>Emoji (optional)</label>
-                <input type="text" id="newFolderEmoji" placeholder="🏛️" maxlength="2">
+                <label>folder name</label>
+                <input type="text" id="newFolderName" placeholder="e.g., museums">
             </div>
 
             <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeNewFolderModal()">Cancel</button>
-                <button class="btn-primary" onclick="createNewFolder()">Create Folder</button>
+                <button class="btn-secondary" id="cancelFolderBtn">cancel</button>
+                <button class="btn-primary" id="createFolderBtn">create</button>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let map, activeCategory = 'visited', markers = [], currentMarker = null, selectedRating = 0;
+        let map;
+        let activeCategory = 'visited';
+        let markers = [];
+        let currentMarker = null;
+        let selectedRating = 0;
         let currentFolder = 'all';
-        let folders = ['all', 'food', 'views', 'stuff'];
+        let folders = ['all', 'food', 'views', 'places'];
 
         const pinCategories = {
-            'visited': { color: '#4CAF50' },
-            'plan-to-visit': { color: '#2196F3' }
+            'visited': { color: '#1c1917' },
+            'plan-to-visit': { color: '#78716c' }
         };
 
-        const defaultFolderEmojis = {
-            'all': '',
-            'food': '🍽️',
-            'views': '🏞️',
-            'stuff': '🎯'
-        };
-
-        document.addEventListener('DOMContentLoaded', function () {
+        // Initialize map
+        function initMap() {
             map = L.map('map').setView([43.6532, -79.3832], 13);
 
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
             }).addTo(map);
 
-            setTimeout(() => map.invalidateSize(), 100);
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 250);
 
             map.on('click', function (e) {
                 currentMarker = {
@@ -708,53 +696,32 @@
                 };
                 openModal();
             });
-
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function () {
-                    selectedRating = parseInt(this.dataset.rating);
-                    updateStars();
-                });
-            });
-
-            document.getElementById('imageInput').addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const preview = document.getElementById('imagePreview');
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            loadFolders();
-            loadPins();
-        });
+        }
 
         function createIcon(color) {
             return L.divIcon({
                 className: 'custom-pin',
-                html: `<svg width="25" height="41" viewBox="0 0 100 100">
+                html: `<svg width="20" height="32" viewBox="0 0 100 100">
                     <path d="M50 0C30 0 12.5 17.5 12.5 37.5C12.5 62.5 50 100 50 100S87.5 62.5 87.5 37.5C87.5 17.5 70 0 50 0Z" 
                     fill="${color}"/>
                 </svg>`,
-                iconSize: [25, 41],
-                iconAnchor: [12.5, 41]
+                iconSize: [20, 32],
+                iconAnchor: [10, 32]
             });
         }
 
         function setActiveCategory(category) {
-            document.querySelectorAll('.pin-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.pin-btn.${category}`).classList.add('active');
             activeCategory = category;
+            document.querySelectorAll('.pin-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
         }
 
         function switchFolder(folder) {
             currentFolder = folder;
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelector(`.tab[data-folder="${folder}"]`).classList.add('active');
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.folder === folder);
+            });
             renderLocations();
         }
 
@@ -777,7 +744,6 @@
         function openNewFolderModal() {
             document.getElementById('newFolderModal').classList.add('active');
             document.getElementById('newFolderName').value = '';
-            document.getElementById('newFolderEmoji').value = '';
         }
 
         function closeNewFolderModal() {
@@ -795,32 +761,30 @@
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
 
             select.innerHTML = folders.filter(f => f !== 'all').map(folder => {
-                const emoji = customFolders[folder]?.emoji || defaultFolderEmojis[folder] || '';
-                const name = customFolders[folder]?.name || folder.charAt(0).toUpperCase() + folder.slice(1);
-                return `<option value="${folder}">${emoji} ${name}</option>`;
+                const name = customFolders[folder]?.name || folder;
+                return `<option value="${folder}">${name}</option>`;
             }).join('');
         }
 
         function createNewFolder() {
-            const name = document.getElementById('newFolderName').value.trim();
-            const emoji = document.getElementById('newFolderEmoji').value.trim();
+            const name = document.getElementById('newFolderName').value.trim().toLowerCase();
 
             if (!name) {
-                alert('Please enter a folder name');
+                alert('please enter a folder name');
                 return;
             }
 
-            const folderId = name.toLowerCase().replace(/\s+/g, '-');
+            const folderId = name.replace(/\s+/g, '-');
 
             if (folders.includes(folderId)) {
-                alert('A folder with this name already exists');
+                alert('a folder with this name already exists');
                 return;
             }
 
             folders.push(folderId);
 
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
-            customFolders[folderId] = { name, emoji };
+            customFolders[folderId] = { name };
             localStorage.setItem('customFolders', JSON.stringify(customFolders));
 
             renderTabs();
@@ -830,12 +794,12 @@
         function deleteFolder(folderId, event) {
             event.stopPropagation();
 
-            if (['all', 'food', 'views', 'stuff'].includes(folderId)) {
-                alert('Cannot delete default folders');
+            if (['all', 'food', 'views', 'places'].includes(folderId)) {
+                alert('cannot delete default folders');
                 return;
             }
 
-            if (!confirm(`Delete folder "${folderId}"? Locations in this folder will not be deleted.`)) {
+            if (!confirm(`delete folder "${folderId}"?`)) {
                 return;
             }
 
@@ -855,15 +819,20 @@
         function renderTabs() {
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
             const tabsHtml = folders.map(folder => {
-                const emoji = customFolders[folder]?.emoji || defaultFolderEmojis[folder] || '';
-                const name = customFolders[folder]?.name || folder.charAt(0).toUpperCase() + folder.slice(1);
-                const isCustom = !['all', 'food', 'views', 'stuff'].includes(folder);
+                const name = customFolders[folder]?.name || folder;
+                const isCustom = !['all', 'food', 'views', 'places'].includes(folder);
                 const deleteBtn = isCustom ? `<span class="delete-tab" onclick="deleteFolder('${folder}', event)">×</span>` : '';
 
-                return `<button class="tab ${folder === currentFolder ? 'active' : ''}" data-folder="${folder}" onclick="switchFolder('${folder}')">${emoji} ${name}${deleteBtn}</button>`;
+                return `<button class="tab ${folder === currentFolder ? 'active' : ''}" data-folder="${folder}">${name}${deleteBtn}</button>`;
             }).join('');
 
-            document.getElementById('tabsContainer').innerHTML = tabsHtml + '<button class="add-tab-btn" onclick="openNewFolderModal()">+</button>';
+            document.getElementById('tabsContainer').innerHTML = tabsHtml + '<button class="add-tab-btn" id="addTabBtn">+</button>';
+
+            // Re-attach event listeners
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => switchFolder(tab.dataset.folder));
+            });
+            document.getElementById('addTabBtn').addEventListener('click', openNewFolderModal);
         }
 
         function saveLocation() {
@@ -874,7 +843,7 @@
             const image = imagePreview.style.display !== 'none' ? imagePreview.src : null;
 
             if (!name) {
-                alert('Please enter a location name');
+                alert('please enter a location name');
                 return;
             }
 
@@ -913,10 +882,10 @@
                 list.innerHTML = `
                     <div class="empty-state">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
-                        <p>${markers.length === 0 ? 'Click on the map to add your first location!' : 'No locations match your search or folder'}</p>
+                        <p>${markers.length === 0 ? 'click on the map to add a location' : 'no locations found'}</p>
                     </div>
                 `;
                 return;
@@ -925,7 +894,7 @@
             list.innerHTML = filteredMarkers.map(({ data }) => {
                 const index = markers.findIndex(m => m.data === data);
                 return `
-                    <div class="location-card" onclick="focusLocation(${index})">
+                    <div class="location-card" data-index="${index}">
                         <div class="location-header">
                             <div class="location-name">${data.name}</div>
                             <div class="rating">${'★'.repeat(data.rating)}${'☆'.repeat(5 - data.rating)}</div>
@@ -935,10 +904,14 @@
                     </div>
                 `;
             }).join('');
-        }
 
-        function filterLocations() {
-            renderLocations();
+            // Add click listeners
+            document.querySelectorAll('.location-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const index = parseInt(card.dataset.index);
+                    focusLocation(index);
+                });
+            });
         }
 
         function focusLocation(index) {
@@ -953,7 +926,7 @@
 
         function loadFolders() {
             const customFolders = JSON.parse(localStorage.getItem('customFolders') || '{}');
-            folders = ['all', 'food', 'views', 'stuff', ...Object.keys(customFolders)];
+            folders = ['all', 'food', 'views', 'places', ...Object.keys(customFolders)];
             renderTabs();
         }
 
@@ -972,12 +945,71 @@
         }
 
         function clearPins() {
-            if (!confirm('Clear all locations? This cannot be undone.')) return;
+            if (!confirm('clear all locations? this cannot be undone.')) return;
             markers.forEach(({ marker }) => map.removeLayer(marker));
             markers = [];
             localStorage.removeItem('footprintLocations');
             renderLocations();
         }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+            loadFolders();
+            loadPins();
+
+            // Pin category buttons
+            document.querySelectorAll('.pin-btn').forEach(btn => {
+                btn.addEventListener('click', () => setActiveCategory(btn.dataset.category));
+            });
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('keyup', renderLocations);
+
+            // Star rating
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function () {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateStars();
+                });
+            });
+
+            // Image upload
+            document.getElementById('imageUpload').addEventListener('click', () => {
+                document.getElementById('imageInput').click();
+            });
+
+            document.getElementById('imageInput').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Modal buttons
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('saveBtn').addEventListener('click', saveLocation);
+            document.getElementById('cancelFolderBtn').addEventListener('click', closeNewFolderModal);
+            document.getElementById('createFolderBtn').addEventListener('click', createNewFolder);
+            document.getElementById('clearBtn').addEventListener('click', clearPins);
+
+            // Page title editing
+            document.getElementById('pageTitle').addEventListener('blur', function () {
+                localStorage.setItem('pageTitle', this.textContent);
+            });
+
+            // Load saved page title
+            const savedTitle = localStorage.getItem('pageTitle');
+            if (savedTitle) {
+                document.getElementById('pageTitle').textContent = savedTitle;
+            }
+        });
     </script>
 </body>
 
