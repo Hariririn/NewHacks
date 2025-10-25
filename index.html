@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello World with OpenStreetMap</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Add BeautifyMarker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/beautifymarker@1.0.9/leaflet-beautify-marker-icon.min.css" />
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,13 +35,17 @@
 <body>
     <h1>Hello, World!</h1>
     <div id="map"></div>
+
     <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js"></script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Add BeautifyMarker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/beautifymarker@1.0.9/leaflet-beautify-marker-icon.min.js"></script>
+
     <script>
         // Initialize the map
         const map = L.map('map').setView([43.6532, -79.3832], 13); // Centered on Toronto
@@ -47,6 +55,29 @@
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+
+        // Add a marker with a BeautifyIcon
+        L.marker([43.6532, -79.3832], {
+            icon: L.BeautifyIcon.icon({
+                icon: 'heart',
+                iconShape: 'marker',
+                borderColor: '#8D208B',
+                textColor: '#8D208B',
+                backgroundColor: 'transparent'
+            })
+        }).addTo(map).bindPopup("This is a beautiful marker!");
+
+        // Add another marker with a different style
+        L.marker([43.6510, -79.3810], {
+            icon: L.BeautifyIcon.icon({
+                icon: 'star',
+                iconShape: 'circle',
+                borderColor: 'green',
+                textColor: 'white',
+                backgroundColor: 'green',
+                innerIconStyle: 'font-size:12px;'
+            })
+        }).addTo(map).bindPopup("Another stylish marker!");
     </script>
 </body>
 </html>
