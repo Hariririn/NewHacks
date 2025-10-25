@@ -22,36 +22,99 @@ h1 {
 }
 
 #map {
-    width: 400px;  /* Fixed width */
-    height: 400px; /* Fixed height */
+    /* Default to a horizontally wide rectangle */
+    width: 80vw;
+    max-width: 1200px;
+    height: 500px;
     margin-top: 20px;
     border: 2px solid #333;
+
+    /* Enable resizing with visible handle */
+    position: relative;  /* Required for resize to work */
+    resize: both;
+    overflow: hidden;   /* Changed from auto to prevent scrollbars */
+    cursor: nwse-resize;  /* Show resize cursor in corner */
 }
 
-.controls {
-    width: 400px;  /* Match map width */
-    margin: 10px 0;
-    padding: 10px;
+.map-controls {
+    width: 80vw;
+    max-width: 1200px;
+    margin: 15px 0;
+    padding: 15px 20px;
     background: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
 }
 
-button {
+.pin-categories {
+    display: flex;
+    gap: 12px;
+}
+
+.pin-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 16px;
+    background-color: #f5f5f5;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.pin-btn .pin-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.pin-btn.visited .pin-color {
     background-color: #4CAF50;
+}
+
+.pin-btn.plan-to-visit .pin-color {
+    background-color: #2196F3;
+}
+
+.pin-btn:hover {
+    background-color: #ebebeb;
+    border-color: #d0d0d0;
+}
+
+.pin-btn.active {
+    background-color: #fff;
+    border-color: currentColor;
+}
+
+.pin-btn.visited.active {
+    color: #4CAF50;
+}
+
+.pin-btn.plan-to-visit.active {
+    color: #2196F3;
+}
+
+.clear-btn {
+    padding: 8px 16px;
+    background-color: #ff5252;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
 }
 
-button:hover {
-    background-color: #45a049;
+.clear-btn:hover {
+    background-color: #ff3939;
 }
 
 @media (max-width: 600px) {

@@ -4,70 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footprint</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
     <h1>Interactive Map</h1>
-    <div class="controls">
-        <button onclick="clearPins()">Clear All Pins</button>
-    </div>
     <div id="map"></div>
+    <div class="map-controls">
+        <div class="pin-categories">
+            <button class="pin-btn visited active" onclick="setActiveCategory('visited')">
+                <span class="pin-color"></span>
+                Visited
+            </button>
+            <button class="pin-btn plan-to-visit" onclick="setActiveCategory('plan-to-visit')">
+                <span class="pin-color"></span>
+                Plan to Visit
+            </button>
+        </div>
+        <button class="clear-btn" onclick="clearPins()">Clear All Pins</button>
+    </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
     <script>
-        // Initialize the map
-        const map = L.map('map').setView([43.6532, -79.3832], 13);
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the map
+            const map = L.map('map').setView([43.6532, -79.3832], 13);
 
-        // Add the OpenStreetMap tiles
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+            // Add the OpenStreetMap tiles
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
 
-        // Array to store markers
-        let markers = [];
-
-        // Load pins from localStorage
-        function loadPins() {
-            const savedPins = localStorage.getItem('mapPins');
-            if (savedPins) {
-                const pins = JSON.parse(savedPins);
-                pins.forEach(pin => {
-                    const marker = L.marker([pin.lat, pin.lng]).addTo(map);
-                    markers.push(marker);
-                });
+            // Ensure Leaflet recalculates size when the container is resized.
+            // Use ResizeObserver when available so user CSS-resize actions invalidate the map.
+            function ensureMapInvalidation(mapEl) {
+                if (window.ResizeObserver) {
+                    const ro = new ResizeObserver(() => {
+                        // small timeout so leaflet recalculates after layout stabilizes
+                        setTimeout(() => { map.invalidateSize(); }, 0);
+                    });
+                    ro.observe(mapEl);
+                } else {
+                    // Fallback: at least update on window resize
+                    window.addEventListener('resize', () => { map.invalidateSize(); });
+                }
             }
-        }
 
-        // Save pins to localStorage
-        function savePins() {
-            const pins = markers.map(marker => {
-                const position = marker.getLatLng();
-                return {
-                    lat: position.lat,
-                    lng: position.lng
-                };
+            // Run initial invalidation after map is ready
+            setTimeout(() => { map.invalidateSize(); }, 0);
+            ensureMapInvalidation(document.getElementById('map'));
+
+            // Setup pin categories
+            const pinCategories = {
+                'visited': {
+                    color: '#4CAF50',
+                    icon: null // Will be initialized below
+                },
+                'plan-to-visit': {
+                    color: '#2196F3',
+                    icon: null
+                }
+            };
+
+            // Create custom icons for each category
+            Object.keys(pinCategories).forEach(category => {
+                pinCategories[category].icon = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<svg width="25" height="41" viewBox="0 0 100 100">
+                        <path d="M50 0C30 0 12.5 17.5 12.5 37.5C12.5 62.5 50 100 50 100S87.5 62.5 87.5 37.5C87.5 17.5 70 0 50 0Z" 
+                        fill="${pinCategories[category].color}"/>
+                    </svg>`,
+                    iconSize: [25, 41],
+                    iconAnchor: [12.5, 41],
+                    popupAnchor: [0, -41]
+                });
             });
-            localStorage.setItem('mapPins', JSON.stringify(pins));
-        }
 
-        // Clear all pins
-        function clearPins() {
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
-            localStorage.removeItem('mapPins');
-        }
+            // Track active category and markers
+            let activeCategory = 'visited';
+            let markers = [];
 
-        // Add click handler to map
-        map.on('click', function(e) {
-            const marker = L.marker(e.latlng).addTo(map);
-            markers.push(marker);
-            savePins();
+            // Set active pin category
+            window.setActiveCategory = function(category) {
+                // Update UI
+                document.querySelectorAll('.pin-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`.pin-btn.${category}`).classList.add('active');
+                
+                // Update active category
+                activeCategory = category;
+            };
+
+            // Load pins from localStorage
+            function loadPins() {
+                const savedPins = localStorage.getItem('mapPins');
+                if (savedPins) {
+                    const pins = JSON.parse(savedPins);
+                    pins.forEach(pin => {
+                        const marker = L.marker([pin.lat, pin.lng], {
+                            icon: pinCategories[pin.category].icon
+                        }).addTo(map);
+                        markers.push({ marker, category: pin.category });
+                    });
+                }
+            }
+
+            // Save pins to localStorage
+            function savePins() {
+                const pins = markers.map(({ marker, category }) => {
+                    const position = marker.getLatLng();
+                    return {
+                        lat: position.lat,
+                        lng: position.lng,
+                        category
+                    };
+                });
+                localStorage.setItem('mapPins', JSON.stringify(pins));
+            }
+
+            // Clear all pins
+            window.clearPins = function() {
+                markers.forEach(({ marker }) => map.removeLayer(marker));
+                markers = [];
+                localStorage.removeItem('mapPins');
+            }
+
+            // Add click handler to map
+            map.on('click', function(e) {
+                const marker = L.marker(e.latlng, {
+                    icon: pinCategories[activeCategory].icon
+                }).addTo(map);
+                markers.push({ marker, category: activeCategory });
+                savePins();
+            });
+
+            // Load saved pins when the page loads
+            loadPins();
         });
-
-        // Load saved pins when the page loads
-        loadPins();
     </script>
 </body>
 </html>
